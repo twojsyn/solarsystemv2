@@ -70,7 +70,9 @@ class Planet:
         x = self.x * Planet.SCALE + SCREEN_WIDTH / 2
         y = self.y * Planet.SCALE + SCREEN_HEIGHT / 2
 
-        pygame.draw.circle(screen, self.color, (x, y), self.radius)
+        scaledRadius = self.radius * Planet.SCALE / (250/Planet.AU) * 1.3
+
+        pygame.draw.circle(screen, self.color, (x, y), scaledRadius)
 
 
 
@@ -83,6 +85,10 @@ class Planet:
     def update_all_planets():
         for planet in Planet.listOfPlanets:
             planet.apply_forces()
+
+    @staticmethod
+    def change_scale(coefficient):
+        Planet.SCALE *= 1.03 ** coefficient
 
 # Odpalenie modułów pygame
 pygame.init()
@@ -132,6 +138,8 @@ def main():
 
         # Te cztery linijki pozwalają nam normalnie zamknąć program
         for event in pygame.event.get():
+            if event.type == pygame.MOUSEWHEEL:
+                Planet.change_scale(event.y)
             if event.type == pygame.QUIT:
                 running = False
                 break
