@@ -1,4 +1,6 @@
 # Potrzebne importy
+import math
+
 import pygame
 
 from pygame.constants import *
@@ -6,35 +8,82 @@ from pygame.locals import *
 
 class Planet:
 
+
+    counter = 0
+    listOfPlanets = []
+
     AU = 149.6e9
     G = 6.67428e-11
     SCALE = 250 / AU
     TIMESTEP = 3600 * 24
 
-
-    def __init__(self, x , y, radius, color, mass):
+    def __init__(self, x, y, radius, color, mass):
         self.x = x
         self.y = y
         self.radius = radius
-        self. color = color
+        self.color = color
         self.mass = mass
 
-        self.isSum = False
+        self.isSun = False
+
+        self.velX = self.velY = 0
+
+        Planet.counter += 1
+        Planet.listOfPlanets.append(self)
+
+    def count_gravity_force(self):
+
+        sumForceX = sumForceY = 0
+
+        for planet in Planet.listOfPlanets:
+            if planet == self:
+                continue
+
+            distance = ((self.x - planet.x) ** 2 + (self.y - planet.y) ** 2) ** 0.5
+
+            force = Planet.G * self.mass * planet.mass / (distance ** 2)
+
+            angle = math.atan2(planet.y - self.y, planet.x - self.x)
+
+            forceX = force * math.cos(angle)
+            forceY = force * math.sin(angle)
+
+            sumForceX += forceX * Planet.TIMESTEP
+            sumForceY += forceY * Planet.TIMESTEP
+
+        return sumForceX, sumForceY
+
+    def apply_forces(self):
+        forceX, forceY = self.count_gravity_force()
+
+        self.velX += forceX / self.mass
+        self.velY += forceY / self.mass
+
+        self.x += self.velX * Planet.TIMESTEP
+        self.y += self.velY * Planet.TIMESTEP
 
     def draw(self):
-        x = self.x * Planet.SCALE + SCREEN_WIDTH/2
-        y = self.y * Planet.SCALE + SCREEN_HEIGHT/2
+        x = self.x * Planet.SCALE + SCREEN_WIDTH / 2
+        y = self.y * Planet.SCALE + SCREEN_HEIGHT / 2
 
         pygame.draw.circle(screen, self.color, (x, y), self.radius)
 
 
 
+    @staticmethod
+    def draw_all_planets():
+        for planet in Planet.listOfPlanets:
+            planet.draw()
 
+    @staticmethod
+    def update_all_planets():
+        for planet in Planet.listOfPlanets:
+            planet.apply_forces()
 
 # Odpalenie modułów pygame
 pygame.init()
 
-SCREEN_WIDTH = 3000
+SCREEN_WIDTH = 1280
 SCREEN_HEIGHT = 720
 
 # Parametry Screena
@@ -45,37 +94,27 @@ def main():
     # Zegar kontrolujący FPS-y
     clock = pygame.time.Clock()
 
-    sun = Planet(0, 0, 30, (255, 255, 0), 1.989e30)
+    sun = Planet(0, 0, 20, (239, 255, 4), 3.0e30)
 
-    mercury = Planet(Planet.AU * 0.47, 0, 8, (254, 127, 0), 3.285e23)
-
-    venus = Planet(Planet.AU * 0.723, 0, 10, (128, 128, 128), 4.867e24)
-
-    earth = Planet(Planet.AU, 0, 15, (0, 0, 255), 5.98e24)
-
-    mars = Planet(Planet.AU * 1.524, 0, 12, (255, 0, 0), 6.4171e23)
-
-    jupiter = Planet(Planet.AU * 5.2, 0, 18, (150, 75, 0), 1.898E27)
-
+    mercury = Planet(0.42 * Planet.AU, 0, 10, (140, 141, 136), 0.330e24)
+    venus = Planet(0.72 * Planet.AU, 0, 10, (255, 128, 0), 4.87e24)
+    earth = Planet(1 * Planet.AU, 0, 10, (0, 0, 255), 5.97e24)
+    mars = Planet(1.63 * Planet.AU, 0, 10, (255, 0, 0), 0.642e24)
+    listOfPlanet = [sun, mercury, venus, earth, mars]
 
     # Pętla gry
     running = True
     while running:
         # LOGIKA GRY (w przyszłości):
+        Planet.update_all_planets()
 
 
         # RYSOWANIE GRAFIKI:
-
         # Wypełnienie okienka kolorem
         screen.fill((0, 0, 0))
 
         # Rysowanie kształtów w PyGame
-        sun.draw()
-        mercury.draw()
-        venus.draw()
-        earth.draw()
-        mars.draw()
-        jupiter.draw()
+        Planet.draw_all_planets()
 
 
         # Czekanie na kolejną klatkę
