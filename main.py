@@ -28,6 +28,10 @@ class Planet:
 
         self.velX = self.velY = 0
 
+        if len(Planet.listOfPlanets) > 0:
+            sunMass = Planet.listOfPlanets[0].mass
+            self.velY = (Planet.G * sunMass / self.x) ** 0.5
+
         Planet.counter += 1
         Planet.listOfPlanets.append(self)
 
@@ -94,13 +98,16 @@ def main():
     # Zegar kontrolujący FPS-y
     clock = pygame.time.Clock()
 
-    sun = Planet(0, 0, 20, (239, 255, 4), 3.0e30)
+    sun = Planet(0, 0, 20, (239, 255, 4), 1.989e30)
 
     mercury = Planet(0.42 * Planet.AU, 0, 10, (140, 141, 136), 0.330e24)
     venus = Planet(0.72 * Planet.AU, 0, 10, (255, 128, 0), 4.87e24)
     earth = Planet(1 * Planet.AU, 0, 10, (0, 0, 255), 5.97e24)
     mars = Planet(1.63 * Planet.AU, 0, 10, (255, 0, 0), 0.642e24)
-    listOfPlanet = [sun, mercury, venus, earth, mars]
+    jupiter = Planet(5.2 * Planet.AU, 0, 10, (255, 255, 255), 1.9e27)
+    saturn = Planet(9.5 * Planet.AU, 0, 10, (216, 132, 48), 5.683E26)
+    uranus = Planet(19.2 * Planet.AU, 0, 10, (51, 204, 255), 8.681E25)
+    neptune = Planet(30 * Planet.AU, 0, 10, (0, 118, 161), 1.024E26)
 
     # Pętla gry
     running = True
